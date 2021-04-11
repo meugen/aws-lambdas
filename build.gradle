@@ -22,9 +22,12 @@ test {
     useJUnitPlatform()
 }
 
-task packageSkinny(type: Zip) {
+task packageDistribution(type: Zip) {
     from compileJava
     from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
 }
 
-build.dependsOn packageSkinny
+build.dependsOn packageDistribution

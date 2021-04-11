@@ -17,8 +17,7 @@ public class SlowRestHandler implements RequestHandler<APIGatewayProxyRequestEve
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
-        String delay = input.getQueryStringParameters().get("delay");
-        Duration duration = delay == null ? Duration.ZERO : Duration.parse(delay);
+        Duration duration = extractDuration(input);
         try {
             Thread.sleep(duration.toMillis());
         } catch (InterruptedException e) {
@@ -27,7 +26,16 @@ public class SlowRestHandler implements RequestHandler<APIGatewayProxyRequestEve
 
         String response = gson.toJson(UUID.randomUUID());
         return new APIGatewayProxyResponseEvent()
-                .withBody(response)
-                .withStatusCode(HttpURLConnection.HTTP_OK);
+                .withStatusCode(HttpURLConnection.HTTP_OK)
+                .withBody(response);
+    }
+
+    private Duration extractDuration(APIGatewayProxyRequestEvent input) {
+        try {
+            String delay = input.getQueryStringParameters().get("delay");
+            return Duration.parse(delay);
+        } catch (Throwable e) {
+            return Duration.ZERO;
+        }
     }
 }
